@@ -961,20 +961,20 @@ def _llm_parse_bill_text_to_df(text: str) -> Tuple[Optional[pd.DataFrame], Dict[
     # Try environment + secrets (both cases)
    key = os.getenv("OPENAI_API_KEY") or os.getenv("openai_api_key")
 
-if not key:
-    st.error("OPENAI_API_KEY is not set. Configure it as an environment variable.")
-    st.stop()
+    if not key:
+        st.error("OPENAI_API_KEY is not set. Configure it as an environment variable.")
+        st.stop()
 
-client = OpenAI(api_key=key)
+    client = OpenAI(api_key=key)
 
-model = os.getenv("LLM_MODEL", "gpt-4o-mini")
-_log(f"LLM parser invoked. model={model}")
+    model = os.getenv("LLM_MODEL", "gpt-4o-mini")
+    _log(f"LLM parser invoked. model={model}")
 
-   try:
-       resp = client.chat.completions.create(
-        model=model,
-        temperature=0,
-        messages=[
+    try:
+        resp = client.chat.completions.create(
+            model=model,
+            temperature=0,
+            messages=[
                 {
                     "role": "system",
                     "content": (
