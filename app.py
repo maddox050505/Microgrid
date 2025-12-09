@@ -37,7 +37,13 @@ from datetime import date
 
 import streamlit as st
 
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+api_key = os.getenv("OPENAI_API_KEY")
+
+if not api_key:
+    st.error("OPENAI_API_KEY is not set. Please configure it in Render.")
+    st.stop()
+
+client = OpenAI(api_key=api_key)
 
 def inject_geolocator():
     st.markdown("""
