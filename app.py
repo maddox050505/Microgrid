@@ -1647,12 +1647,14 @@ def _llm_tariff_from_location(zip_code: str, region: str = "", application: str 
     application = (application or "").strip()
 
     # Reuse the same key discovery logic as the bill parser
-    key = (
-        os.getenv("OPENAI_API_KEY")
-        or os.getenv("openai_api_key")
-        or (st.secrets.get("OPENAI_API_KEY") if hasattr(st, "secrets") else None)
-        or (st.secrets.get("openai_api_key") if hasattr(st, "secrets") else None)
-    )
+    key = os.getenv("OPENAI_API_KEY") or os.getenv("openai_api_key")
+
+if not key:
+    st.error("OPENAI_API_KEY is not set. Configure it as an environment variable.")
+    st.stop()
+
+client = OpenAI(api_key=key)
+
     if not key:
         # No key = no LLM tariff
         return None
