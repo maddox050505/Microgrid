@@ -959,12 +959,13 @@ def _llm_parse_bill_text_to_df(text: str) -> Tuple[Optional[pd.DataFrame], Dict[
         return None, {}
 
     # Try environment + secrets (both cases)
-    key = (
-        os.getenv("OPENAI_API_KEY")
-        or os.getenv("openai_api_key")
-        or (st.secrets.get("OPENAI_API_KEY") if hasattr(st, "secrets") else None)
-        or (st.secrets.get("openai_api_key") if hasattr(st, "secrets") else None)
-    )
+   key = os.getenv("OPENAI_API_KEY") or os.getenv("openai_api_key")
+
+if not key:
+    st.error("OPENAI_API_KEY is not set. Configure it as an environment variable.")
+    st.stop()
+
+client = OpenAI(api_key=key)
 
     if not key:
         _log("LLM parser skipped: no OPENAI_API_KEY found in env or secrets.")
@@ -1089,12 +1090,14 @@ def llm_recommend_windows(
         return None
 
     # Find API key the same way you do for the bill parser
-    key = (
-        os.getenv("OPENAI_API_KEY")
-        or os.getenv("openai_api_key")
-        or (st.secrets.get("OPENAI_API_KEY") if hasattr(st, "secrets") else None)
-        or (st.secrets.get("openai_api_key") if hasattr(st, "secrets") else None)
-    )
+   key = os.getenv("OPENAI_API_KEY") or os.getenv("openai_api_key")
+
+if not key:
+    st.error("OPENAI_API_KEY is not set. Configure it as an environment variable.")
+    st.stop()
+
+client = OpenAI(api_key=key)
+
     if not key:
         _log("LLM optimizer skipped: no OPENAI_API_KEY.")
         return None
