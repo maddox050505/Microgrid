@@ -967,7 +967,7 @@ if not key:
 
 client = OpenAI(api_key=key)
 
-    if not key:
+if not key:
         _log("LLM parser skipped: no OPENAI_API_KEY found in env or secrets.")
         return None, {}
 
