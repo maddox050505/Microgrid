@@ -959,7 +959,7 @@ def _llm_parse_bill_text_to_df(text: str) -> Tuple[Optional[pd.DataFrame], Dict[
         return None, {}
 
     # Try environment + secrets (both cases)
-   key = os.getenv("OPENAI_API_KEY") or os.getenv("openai_api_key")
+key = os.getenv("OPENAI_API_KEY") or os.getenv("openai_api_key")
 
 if not key:
     st.error("OPENAI_API_KEY is not set. Configure it as an environment variable.")
