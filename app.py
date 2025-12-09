@@ -970,12 +970,9 @@ client = OpenAI(api_key=key)
 model = os.getenv("LLM_MODEL", "gpt-4o-mini")
 _log(f"LLM parser invoked. model={model}")
 
-    try:
-        from openai import OpenAI
-        client = OpenAI(api_key=key)
-
-        resp = client.chat.completions.create(
-            model=model,
+   try:
+    resp = client.chat.completions.create(
+        model=model,
             temperature=0,
             messages=[
                 {
