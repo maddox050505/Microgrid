@@ -971,10 +971,10 @@ model = os.getenv("LLM_MODEL", "gpt-4o-mini")
 _log(f"LLM parser invoked. model={model}")
 
    try:
-    resp = client.chat.completions.create(
+       resp = client.chat.completions.create(
         model=model,
-            temperature=0,
-            messages=[
+        temperature=0,
+        messages=[
                 {
                     "role": "system",
                     "content": (
