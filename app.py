@@ -959,7 +959,7 @@ def _llm_parse_bill_text_to_df(text: str) -> Tuple[Optional[pd.DataFrame], Dict[
         return None, {}
 
     # Try environment + secrets (both cases)
-    key = os.getenv("OPENAI_API_KEY") or os.getenv("openai_api_key")
+   key = os.getenv("OPENAI_API_KEY") or os.getenv("openai_api_key")
 
 if not key:
     st.error("OPENAI_API_KEY is not set. Configure it as an environment variable.")
@@ -967,12 +967,8 @@ if not key:
 
 client = OpenAI(api_key=key)
 
-if not key:
-        _log("LLM parser skipped: no OPENAI_API_KEY found in env or secrets.")
-        return None, {}
-
-    model = os.getenv("LLM_MODEL", "gpt-4o-mini")
-    _log(f"LLM parser invoked. model={model}")
+model = os.getenv("LLM_MODEL", "gpt-4o-mini")
+_log(f"LLM parser invoked. model={model}")
 
     try:
         from openai import OpenAI
