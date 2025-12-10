@@ -2210,7 +2210,7 @@ def view_upload():
 
         # Store what we have in session
         if total_kwh is not None:
-           try:
+          try:
     total_kwh_val = float(total_kwh)
     usage_display = f"{total_kwh_val:,.0f} kWh"
 except (TypeError, ValueError):
