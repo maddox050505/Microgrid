@@ -1614,10 +1614,10 @@ if st.session_state.get("step", "login") == "login":
 # =========================
 # LLM-based Tariff Estimator (optional)
 # =========================
-def _llm_tariff_from_location(zip_code: str, region: str = "", application: str = "") -> Optional[dict]:
+def _llm_tariff_from_location(zip_code: str = "", region: str = "", application: str = "") -> Optional[dict]:
     """
     Use OpenAI to estimate a realistic time-of-use tariff for this location + application.
-    This is *approximate* (based on model knowledge, not live utility data).
+    This is approximate (based on model knowledge, not live utility data).
     Returns a tariff dict matching our internal shape or None on failure.
     """
     zip_code = (zip_code or "").strip()
@@ -1627,11 +1627,9 @@ def _llm_tariff_from_location(zip_code: str, region: str = "", application: str 
     # Reuse the same key discovery logic as the bill parser
     key = os.getenv("OPENAI_API_KEY") or os.getenv("openai_api_key")
 
-if not key:
-    st.error("OPENAI_API_KEY is not set. Configure it as an environment variable.")
-    st.stop()
-
-client = OpenAI(api_key=key)
+    if not key:
+        st.error("OPENAI_API_KEY is not set. Configure it as an environment variable.")
+        st.stop()
 
     try:
         from openai import OpenAI
@@ -1639,8 +1637,8 @@ client = OpenAI(api_key=key)
 
         model = os.getenv("LLM_MODEL", "gpt-4o-mini")
 
-        # We ask the model for a *simple JSON tariff* we can feed into the rest of the app
-                system_msg = (
+        # We ask the model for a simple JSON tariff we can feed into the rest of the app
+        system_msg = (
             "You are an electricity tariff estimator. "
             "Given a location and application type, you return a plausible time-of-use tariff. "
             "Not exact live data. Your output MUST be valid JSON only, no commentary.\n"
@@ -1661,14 +1659,13 @@ client = OpenAI(api_key=key)
         )
 
         user_msg = (
-            f"Location: ZIP/postal '{zip_code}', region '{region}'. "
-            f"Application type: '{application}' (e.g. Residential, Commercial, Industrial). "
-            "Return a single JSON object only, following the schema above."
+            f"Location: ZIP/postal {{zip_code}}, region {{region}}.\n"
+            f"Application type: {{application}}.\n"
         )
 
         resp = client.chat.completions.create(
             model=model,
-            temperature=0.1,
+            temperature=0,
             response_format={"type": "json_object"},
             messages=[
                 {"role": "system", "content": system_msg},
@@ -1677,27 +1674,26 @@ client = OpenAI(api_key=key)
         )
 
         content = (resp.choices[0].message.content or "").strip()
-        data = json.loads(content)
+        if not content:
+            _log("LLM tariff estimator returned empty content.")
+            return None
 
-        # Basic sanity check
+        try:
+            data = json.loads(content)
+        except Exception:
+            _log("LLM tariff estimator output was not valid JSON.")
+            return None
+
         if not isinstance(data, dict):
+            _log("LLM tariff estimator output was not a dict.")
             return None
-        if "weekday_periods" not in data or not isinstance(data["weekday_periods"], list):
-            return None
-        # Fill defaults if missing
-        data.setdefault("timezone", "UTC")
-        data.setdefault("weekend_periods", None)
-        data.setdefault("demand_charge_lambda", 5.0)
-        data.setdefault("diesel_cost_usd_per_kwh", 0.35)
 
         return data
 
     except Exception as e:
-        # Fail quietly – we'll fall back to the catalog-based estimator
-        st.info(f"LLM tariff estimator unavailable: {e}")
+        _log(f"LLM tariff estimator error: {e}")
         return None
             
-
 # =========================
 # Tariff estimator (unchanged)
 # =========================
