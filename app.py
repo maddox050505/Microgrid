@@ -2189,7 +2189,7 @@ def view_upload():
     # =========================================================
     #  IMAGE BILLS (OpenAI Vision / image extractor path)
     # =========================================================
-           if bill.type and bill.type.startswith("image/"):
+               if bill.type and bill.type.startswith("image/"):
         try:
             st.info("Reading your bill image with AI…")
             total_kwh, amount_due = extract_bill_from_image(bill)
@@ -2210,14 +2210,17 @@ def view_upload():
 
     # Store what we have in session
     if total_kwh is not None:
-        try:
-            total_kwh_val = float(total_kwh)
+        # Safely interpret total_kwh; handle non-numeric like "unknown"
+        kwh_text = str(total_kwh).replace(",", "").strip()
+        if kwh_text.replace(".", "", 1).isdigit():
+            total_kwh_val = float(kwh_text)
             usage_display = f"{total_kwh_val:,.0f} kWh"
-        except (TypeError, ValueError):
+            st.session_state["bill_monthly_kwh"] = total_kwh_val
+        else:
             usage_display = "Unknown"
+            st.session_state["bill_monthly_kwh"] = 0.0
 
         st.metric("Detected Monthly Usage", usage_display)
-        st.session_state["bill_monthly_kwh"] = float(total_kwh)
     else:
         st.warning("Usage not found on the image. Please enter it below.")
         st.session_state["bill_monthly_kwh"] = 0.0
