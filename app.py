@@ -1080,16 +1080,16 @@ def llm_recommend_windows(
       ]
     }
     """
-    values = (price_vector or {}).get("values_usd_per_kwh") or []
+      values = (price_vector or {}).get("values_usd_per_kwh") or []
     if not values or bill_monthly_cost <= 0:
         return None
 
     # Find API key the same way you do for the bill parser
-   key = os.getenv("OPENAI_API_KEY") or os.getenv("openai_api_key")
+    key = os.getenv("OPENAI_API_KEY") or os.getenv("openai_api_key")
 
-if not key:
-    st.error("OPENAI_API_KEY is not set. Configure it as an environment variable.")
-    st.stop()
+    if not key:
+        st.error("OPENAI_API_KEY is not set. Configure it as an environment variable.")
+        st.stop()
 
 client = OpenAI(api_key=key)
 
