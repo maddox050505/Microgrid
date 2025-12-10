@@ -1611,10 +1611,14 @@ with st.sidebar:
 if st.session_state.get("step", "login") == "login":
         go_step("upload")
 
-# =========================
+# ============================
 # LLM-based Tariff Estimator (optional)
-# =========================
-def _llm_tariff_from_location(zip_code: str = "", region: str = "", application: str = "") -> Optional[dict]:
+# ============================
+def _llm_tariff_from_location(
+    zip_code: str = "",
+    region: str = "",
+    application: str = "",
+) -> Optional[dict]:
     """
     Use OpenAI to estimate a realistic time-of-use tariff for this location + application.
     This is approximate (based on model knowledge, not live utility data).
@@ -1628,10 +1632,12 @@ def _llm_tariff_from_location(zip_code: str = "", region: str = "", application:
     key = os.getenv("OPENAI_API_KEY") or os.getenv("openai_api_key")
 
     if not key:
+        _log("LLM tariff estimator skipped: no OPENAI_API_KEY.")
         st.error("OPENAI_API_KEY is not set. Configure it as an environment variable.")
         st.stop()
 
     try:
+        from openai import OpenAI
         client = OpenAI(api_key=key)
 
         model = os.getenv("LLM_MODEL", "gpt-4o-mini")
@@ -1658,8 +1664,8 @@ def _llm_tariff_from_location(zip_code: str = "", region: str = "", application:
         )
 
         user_msg = (
-            f"Location: ZIP/postal {{zip_code}}, region {{region}}.\n"
-            f"Application type: {{application}}.\n"
+            f"Location: ZIP/postal {zip_code}, region {region}.\n"
+            f"Application type: {application}.\n"
         )
 
         resp = client.chat.completions.create(
