@@ -970,14 +970,12 @@ def _llm_parse_bill_text_to_df(text: str) -> Tuple[Optional[pd.DataFrame], Dict[
     model = os.getenv("LLM_MODEL", "gpt-4o-mini")
     _log(f"LLM parser invoked. model={model}")
 
-    try:
+      try:
         resp = client.chat.completions.create(
             model=model,
             temperature=0,
             messages=[
-                # your existing messages list goes here
-            ],
-        )
+                {
                     "role": "system",
                     "content": (
                         "You are a robust bill-to-data parser. Return STRICT JSON ONLY. "
@@ -989,7 +987,10 @@ def _llm_parse_bill_text_to_df(text: str) -> Tuple[Optional[pd.DataFrame], Dict[
                         "NO commentary, no prose, just JSON."
                     ),
                 },
-                {"role": "user", "content": text},
+                {
+                    "role": "user",
+                    "content": text,
+                },
             ],
         )
 
