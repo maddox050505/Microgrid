@@ -31,7 +31,11 @@ import streamlit as st
 from openai import OpenAI
 import string
 from typing import Tuple
-from twilio.rest import Client
+
+try:
+    from twilio.rest import Client
+except ModuleNotFoundError:
+    Client = None  # Twilio not available; SMS features will be disabled
 
 from PIL import Image, ImageFilter, ImageOps 
 
