@@ -1070,7 +1070,9 @@ def llm_recommend_windows(
       - sanity-check baseline cost
       - estimate daily/monthly/yearly savings from shifting load
       - return explicit cheap windows to run heavy loads
+
     Input: bill summary + price vector (start_ts, interval_min, values_usd_per_kwh)
+
     Output: dict like:
     {
       "baseline_daily_cost_usd": float,
@@ -1128,7 +1130,23 @@ def llm_recommend_windows(
                 },
             ],
         )
-        # (rest of your parsing/return logic here)
+
+        content = (resp.choices[0].message.content or "").strip()
+        if not content:
+            _log("LLM optimizer returned empty content.")
+            return None
+
+        try:
+            data = json.loads(content)
+        except Exception:
+            _log("LLM optimizer output was not valid JSON.")
+            return None
+
+        if not isinstance(data, dict):
+            _log("LLM optimizer output was not a dict.")
+            return None
+
+        return data
 
     except Exception as e:
         _log(f"LLM optimizer error: {e}")
