@@ -1084,6 +1084,7 @@ def llm_recommend_windows(
       ]
     }
     """
+    
     values = (price_vector or {}).get("values_usd_per_kwh") or []
     if not values or bill_monthly_cost <= 0:
         return None
