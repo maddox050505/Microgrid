@@ -52,6 +52,36 @@ if not api_key:
 
 client = OpenAI(api_key=api_key)
 
+def require_app_password():
+    """Gate the entire app behind a single shared password."""
+    APP_PASSWORD = st.secrets.get("APP_PASSWORD")
+
+    if not APP_PASSWORD:
+        # In case you forget to set it, don't lock yourself out in dev
+        st.warning("APP_PASSWORD is not set in secrets; skipping login gate.")
+        return
+
+    if "app_authed" not in st.session_state:
+        st.session_state["app_authed"] = False
+
+    if st.session_state["app_authed"]:
+        return  # already logged in for this session
+
+    st.title("Microgrid Access")
+    st.caption("Enter the access password you received from your Microgrid partner.")
+
+    password = st.text_input("Access password", type="password")
+
+    col1, col2 = st.columns([1, 3])
+    with col1:
+        if st.button("Enter"):
+            if password == APP_PASSWORD:
+                st.session_state["app_authed"] = True
+                st.experimental_rerun()
+            else:
+                st.error("Incorrect password. Please try again.")
+    st.stop()
+
 def inject_geolocator():
     st.markdown("""
     <script>
@@ -2090,6 +2120,9 @@ def _local_build_price_vector_from_tariff(tariff: dict, start_ts: str, horizon: 
                 price = float(p["price_usd_per_kwh"]); break
         prices.append(price if price is not None else float(periods[-1]["price_usd_per_kwh"]))
     return {"start_ts": start.isoformat(), "interval_min": int(interval_min), "values_usd_per_kwh": prices}
+
+def main():
+    require_app_password() 
 
 # =========================
 # Views
