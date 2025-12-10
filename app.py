@@ -952,7 +952,7 @@ def _llm_parse_bill_text_to_df(text: str) -> Tuple[Optional[pd.DataFrame], Dict[
       - a single-row DataFrame with total_kwh.
     Also returns a dict of extra fields (amount_due, account_number, billing_period).
     """
-    # Normalize input
+      # Normalize input
     text = (text or "").strip()
     if not text:
         _log("LLM parser skipped: empty text.")
