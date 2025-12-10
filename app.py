@@ -970,7 +970,7 @@ def _llm_parse_bill_text_to_df(text: str) -> Tuple[Optional[pd.DataFrame], Dict[
     model = os.getenv("LLM_MODEL", "gpt-4o-mini")
     _log(f"LLM parser invoked. model={model}")
 
-      try:
+         try:
         resp = client.chat.completions.create(
             model=model,
             temperature=0,
@@ -994,10 +994,9 @@ def _llm_parse_bill_text_to_df(text: str) -> Tuple[Optional[pd.DataFrame], Dict[
             ],
         )
 
-        content = (resp.choices[0].message.content or "").strip()
-        if not content:
-            _log("LLM returned empty content.")
-            return None, {}
+    except Exception as e:
+        _log(f"LLM parser error: {e}")
+        return None, {}
 
         data = _extract_json_from_text(content)
         if not isinstance(data, dict):
