@@ -2188,7 +2188,7 @@ def view_upload():
 
     # =========================================================
     #  IMAGE BILLS (OpenAI Vision / image extractor path)
-       # ---------- Normal mode: require a bill upload ----------
+    # ---------- Normal mode: require a bill upload ----------
     bill = st.file_uploader(
         "Upload your bill",
         type=["pdf", "png", "jpg", "jpeg", "heic", "webp"],
