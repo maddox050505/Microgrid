@@ -1633,10 +1633,6 @@ if not key:
 
 client = OpenAI(api_key=key)
 
-    if not key:
-        # No key = no LLM tariff
-        return None
-
     try:
         from openai import OpenAI
         client = OpenAI(api_key=key)
