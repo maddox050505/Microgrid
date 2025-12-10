@@ -1089,15 +1089,13 @@ def llm_recommend_windows(
     if not values or bill_monthly_cost <= 0:
         return None
 
-    # Find API key the same way you do for the bill parser
-     key = os.getenv("OPENAI_API_KEY") or os.getenv("openai_api_key")
+       # Find API key the same way you do for the bill parser
+    key = os.getenv("OPENAI_API_KEY") or os.getenv("openai_api_key")
 
     if not key:
         _log("LLM optimizer skipped: no OPENAI_API_KEY.")
         st.error("OPENAI_API_KEY is not set. Configure it as an environment variable.")
         st.stop()
-
-    client = OpenAI(api_key=key)
 
     model = os.getenv("LLM_MODEL", "gpt-4o-mini")
 
