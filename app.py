@@ -1644,24 +1644,24 @@ client = OpenAI(api_key=key)
         model = os.getenv("LLM_MODEL", "gpt-4o-mini")
 
         # We ask the model for a *simple JSON tariff* we can feed into the rest of the app
-        system_msg = (
+                system_msg = (
             "You are an electricity tariff estimator. "
-            "Given a location and application type, you return a plausible time-of-use tariff, "
-            "NOT exact live data. Your output MUST be valid JSON only, no commentary. "
+            "Given a location and application type, you return a plausible time-of-use tariff. "
+            "Not exact live data. Your output MUST be valid JSON only, no commentary.\n"
             "Schema:\n"
             "{\n"
             '  "timezone": "string",\n'
             '  "weekday_periods": [\n'
-            '    {"name": "Off-peak", "start_hour": 0,  "end_hour": 7,  "price_usd_per_kwh": 0.12},\n'
-            '    {"name": "Mid-peak","start_hour": 7,  "end_hour": 16, "price_usd_per_kwh": 0.20},\n'
-            '    {"name": "Peak",    "start_hour": 16, "end_hour": 21, "price_usd_per_kwh": 0.32},\n'
-            '    {"name": "Off-peak","start_hour": 21, "end_hour": 24, "price_usd_per_kwh": 0.12}\n'
+            '    {"name": "Off-peak", "start_hour": 0, "end_hour": 7, "price_usd_per_kwh": 0.12},\n'
+            '    {"name": "Mid-peak", "start_hour": 7, "end_hour": 16, "price_usd_per_kwh": 0.20},\n'
+            '    {"name": "Peak", "start_hour": 16, "end_hour": 21, "price_usd_per_kwh": 0.32},\n'
+            '    {"name": "Off-peak", "start_hour": 21, "end_hour": 24, "price_usd_per_kwh": 0.12}\n'
             "  ],\n"
-            '  "weekend_periods": null OR same structure as weekday_periods,\n'
-            '  "demand_charge_lambda": 0.0–20.0,\n'
-            '  "diesel_cost_usd_per_kwh": 0.2–0.6\n'
+            '  "weekend_periods": null,\n'
+            '  "demand_charge_lambda": 0.0,\n'
+            '  "diesel_cost_usd_per_kwh": 0.20\n'
             "}\n"
-            "Prices must be in USD. If information is uncertain, return a *reasonable* generic TOU pattern."
+            "Prices must be in USD. If information is uncertain, return a reasonable generic TOU pattern."
         )
 
         user_msg = (
