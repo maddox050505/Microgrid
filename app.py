@@ -2189,7 +2189,7 @@ def view_upload():
     # =========================================================
     #  IMAGE BILLS (OpenAI Vision / image extractor path)
     # =========================================================
-               if bill.type and bill.type.startswith("image/"):
+    if bill.type and bill.type.startswith("image/"):
         try:
             st.info("Reading your bill image with AI…")
             total_kwh, amount_due = extract_bill_from_image(bill)
