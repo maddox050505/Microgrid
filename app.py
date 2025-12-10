@@ -958,7 +958,7 @@ def _llm_parse_bill_text_to_df(text: str) -> Tuple[Optional[pd.DataFrame], Dict[
         _log("LLM parser skipped: empty text.")
         return None, {}
 
-    # Try environment + secrets (both cases)
+    # Get OpenAI API key from environment
     key = os.getenv("OPENAI_API_KEY") or os.getenv("openai_api_key")
 
     if not key:
@@ -975,7 +975,9 @@ def _llm_parse_bill_text_to_df(text: str) -> Tuple[Optional[pd.DataFrame], Dict[
             model=model,
             temperature=0,
             messages=[
-                {
+                # your existing messages list goes here
+            ],
+        )
                     "role": "system",
                     "content": (
                         "You are a robust bill-to-data parser. Return STRICT JSON ONLY. "
