@@ -2189,7 +2189,7 @@ def view_upload():
     # =========================================================
     #  IMAGE BILLS (OpenAI Vision / image extractor path)
     # =========================================================
-    if bill.type and bill.type.startswith("image/"):
+        if bill.type and bill.type.startswith("image/"):
         try:
             st.info("Reading your bill image with AI…")
             total_kwh, amount_due = extract_bill_from_image(bill)
@@ -2217,40 +2217,39 @@ def view_upload():
             usage_display = "Unknown"
 
         st.metric("Detected Monthly Usage", usage_display)
+        st.session_state["bill_monthly_kwh"] = float(total_kwh)
+    else:
+        st.warning("Usage not found on the image. Please enter it below.")
+        st.session_state["bill_monthly_kwh"] = 0.0
 
-            st.session_state["bill_monthly_kwh"] = float(total_kwh)
-        else:
-            st.warning("Usage not found on the image. Please enter it below.")
-            st.session_state["bill_monthly_kwh"] = 0.0
+    if amount_due is not None:
+        st.metric("Detected Monthly Cost", f"${float(amount_due):,.2f}")
+        st.session_state["bill_monthly_cost"] = float(amount_due)
+    else:
+        st.warning("Cost not found on the image. Please enter it below.")
+        st.session_state["bill_monthly_cost"] = 0.0
 
-        if amount_due is not None:
-            st.metric("Detected Monthly Cost", f"${float(amount_due):,.2f}")
-            st.session_state["bill_monthly_cost"] = float(amount_due)
-        else:
-            st.warning("Cost not found on the image. Please enter it below.")
-            st.session_state["bill_monthly_cost"] = 0.0
+    # Always give the user a chance to confirm/override
+    kwh = st.number_input(
+        "Confirm Monthly Usage (kWh)",
+        min_value=0.0,
+        value=float(st.session_state.get("bill_monthly_kwh", 0.0)),
+        key="img_confirm_kwh",
+    )
+    cost = st.number_input(
+        "Confirm Monthly Cost ($)",
+        min_value=0.0,
+        value=float(st.session_state.get("bill_monthly_cost", 0.0)),
+        key="img_confirm_cost",
+    )
 
-        # Always give the user a chance to confirm/override
-        kwh = st.number_input(
-            "Confirm Monthly Usage (kWh)",
-            min_value=0.0,
-            value=float(st.session_state.get("bill_monthly_kwh", 0.0)),
-            key="img_confirm_kwh",
-        )
-        cost = st.number_input(
-            "Confirm Monthly Cost ($)",
-            min_value=0.0,
-            value=float(st.session_state.get("bill_monthly_cost", 0.0)),
-            key="img_confirm_cost",
-        )
+    if st.button("Continue →", key="img_continue_btn"):
+        st.session_state["bill_monthly_kwh"] = kwh
+        st.session_state["bill_monthly_cost"] = cost
+        _go_to_dashboard_with_current_bill()
+        return
 
-        if st.button("Continue →", key="img_continue_btn"):
-            st.session_state["bill_monthly_kwh"] = kwh
-            st.session_state["bill_monthly_cost"] = cost
-            _go_to_dashboard_with_current_bill()
-            return
-
-        return  # wait for user to click the button
+    return  # wait for user to click the button
 
     # =========================================================
     #  NON-IMAGE BILLS (PDF / other) → read_energy_bill_any
