@@ -33,7 +33,6 @@ import string
 from typing import Tuple
 from twilio.rest import Client
 
-
 from PIL import Image, ImageFilter, ImageOps 
 
 import streamlit as st
