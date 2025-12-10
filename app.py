@@ -2186,20 +2186,11 @@ def view_upload():
         st.caption("Upload a bill to continue, or turn on Test mode above.")
         return
 
-    # =========================================================
-    #  IMAGE BILLS (OpenAI Vision / image extractor path)
-    # ---------- Normal mode: require a bill upload ----------
-    bill = st.file_uploader(
-        "Upload your bill",
-        type=["pdf", "png", "jpg", "jpeg", "heic", "webp"],
-        accept_multiple_files=False,
-    )
+    # Initialize extracted values
+    total_kwh = None
+    amount_due = None
 
-    if not bill:
-        st.caption("Upload a bill to continue, or turn on Test mode above.")
-        return
-
-    # ---------- Handle image bills ----------
+    # ---------- Handle image bills with AI ----------
     if bill.type and bill.type.startswith("image/"):
         try:
             st.info("Reading your bill image with AI…")
@@ -2218,8 +2209,14 @@ def view_upload():
             )
 
         st.success("Bill successfully read ✔")
+    else:
+        # For now, non-image (e.g., PDF) bills fall back to manual entry
+        return manual_entry(
+            "Automatic bill reading for this file type is not yet available. "
+            "Please enter your bill details below."
+        )
 
-    # Store what we have in session
+    # ---------- Store what we have in session & show metrics ----------
     if total_kwh is not None:
         # Safely interpret total_kwh; handle non-numeric like "unknown"
         kwh_text = str(total_kwh).replace(",", "").strip()
@@ -2237,13 +2234,18 @@ def view_upload():
         st.session_state["bill_monthly_kwh"] = 0.0
 
     if amount_due is not None:
-        st.metric("Detected Monthly Cost", f"${float(amount_due):,.2f}")
-        st.session_state["bill_monthly_cost"] = float(amount_due)
+        try:
+            amount_val = float(str(amount_due).replace(",", "").strip())
+        except (TypeError, ValueError):
+            amount_val = 0.0
+
+        st.metric("Detected Monthly Cost", f"${amount_val:,.2f}")
+        st.session_state["bill_monthly_cost"] = amount_val
     else:
         st.warning("Cost not found on the image. Please enter it below.")
         st.session_state["bill_monthly_cost"] = 0.0
 
-    # Always give the user a chance to confirm/override
+    # ---------- Always give the user a chance to confirm/override ----------
     kwh = st.number_input(
         "Confirm Monthly Usage (kWh)",
         min_value=0.0,
