@@ -1099,7 +1099,6 @@ def llm_recommend_windows(
 
     client = OpenAI(api_key=key)
 
-    client = OpenAI(api_key=key)
     model = os.getenv("LLM_MODEL", "gpt-4o-mini")
 
     payload = {
