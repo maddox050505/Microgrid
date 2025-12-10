@@ -12,3 +12,4 @@ Pillow
 camelot-py
 tabula-py
 openai
+twilio
