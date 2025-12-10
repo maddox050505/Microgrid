@@ -1060,7 +1060,6 @@ def _llm_parse_bill_text_to_df(text: str) -> Tuple[Optional[pd.DataFrame], Dict[
 
 from openai import OpenAI  # add near top if not already there
 
-
 def llm_recommend_windows(
     bill_monthly_kwh: float,
     bill_monthly_cost: float,
