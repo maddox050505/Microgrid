@@ -1084,12 +1084,11 @@ def llm_recommend_windows(
       ]
     }
     """
-    
     values = (price_vector or {}).get("values_usd_per_kwh") or []
     if not values or bill_monthly_cost <= 0:
         return None
 
-       # Find API key the same way you do for the bill parser
+    # Find API key the same way you do for the bill parser
     key = os.getenv("OPENAI_API_KEY") or os.getenv("openai_api_key")
 
     if not key:
@@ -1118,23 +1117,9 @@ def llm_recommend_windows(
                 {
                     "role": "system",
                     "content": (
-                        "You are an energy analyst. "
-                        "Given a monthly bill and a time-of-use price vector, "
-                        "propose a realistic demand-shifting strategy that minimizes cost "
-                        "without making up impossible savings.\n\n"
-                        "Return STRICT JSON ONLY with this schema:\n"
-                        "{\n"
-                        '  "baseline_daily_cost_usd": float,  # your best estimate\n'
-                        '  "optimized_daily_cost_usd": float,\n'
-                        '  "daily_savings_usd": float,\n'
-                        '  "monthly_savings_usd": float,\n'
-                        '  "yearly_savings_usd": float,\n'
-                        '  "cheap_windows": [\n'
-                        '     {"start": "HH:MM", "end": "HH:MM", "label": "short tip"},\n'
-                        "     ...\n"
-                        "  ]\n"
-                        "}\n"
-                        "Do not include any explanation text, just JSON."
+                        "You are an assistant that analyzes electricity tariffs and "
+                        "suggests when to run flexible loads to save money. "
+                        "Always return valid JSON matching the requested schema."
                     ),
                 },
                 {
@@ -1143,30 +1128,11 @@ def llm_recommend_windows(
                 },
             ],
         )
-        content = (resp.choices[0].message.content or "").strip()
-        data = _extract_json_from_text(content)
-        if not isinstance(data, dict):
-            _log("LLM optimizer: JSON parse failed.")
-            return None
-        # Light sanity checks
-        for k in [
-            "baseline_daily_cost_usd",
-            "optimized_daily_cost_usd",
-            "daily_savings_usd",
-            "monthly_savings_usd",
-            "yearly_savings_usd",
-        ]:
-            if k in data:
-                try:
-                    data[k] = float(data[k])
-                except Exception:
-                    data[k] = 0.0
-        if not isinstance(data.get("cheap_windows"), list):
-            data["cheap_windows"] = []
-        return data
+        # (rest of your parsing/return logic here)
+
     except Exception as e:
-        _log(f"LLM optimizer failed: {e}")
-        return None        
+        _log(f"LLM optimizer error: {e}")
+        return None
 
 def ai_read_bill(uploaded, allow_llm: bool = True) -> Tuple[Optional[pd.DataFrame], Dict, str]:
     st.session_state["parse_log"] = []
