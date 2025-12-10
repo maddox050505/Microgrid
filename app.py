@@ -965,7 +965,7 @@ def _llm_parse_bill_text_to_df(text: str) -> Tuple[Optional[pd.DataFrame], Dict[
         st.error("OPENAI_API_KEY is not set. Configure it as an environment variable.")
         st.stop()
 
-       client = OpenAI(api_key=key)
+           client = OpenAI(api_key=key)
 
     model = os.getenv("LLM_MODEL", "gpt-4o-mini")
     _log(f"LLM parser invoked. model={model}")
@@ -994,7 +994,6 @@ def _llm_parse_bill_text_to_df(text: str) -> Tuple[Optional[pd.DataFrame], Dict[
             ],
         )
 
-        # Pull the model output text
         content = (resp.choices[0].message.content or "").strip()
         if not content:
             _log("LLM returned empty content.")
