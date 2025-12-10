@@ -29,6 +29,10 @@ import base64
 import json
 import streamlit as st
 from openai import OpenAI
+import string
+from typing import Tuple
+from twilio.rest import Client
+
 
 from PIL import Image, ImageFilter, ImageOps 
 
@@ -352,6 +356,85 @@ def _handle_js_message():
     msg = params.get("geo_message")
     if msg:
         st.session_state["geo_coords"] = msg[0]
+
+def generate_and_text_credentials(
+    user_phone_number: str,
+    username_prefix: str = "microgrid",
+    username_length: int = 6,
+    password_length: int = 12,
+) -> Tuple[str, str]:
+    """
+    Generate a random username + password and send them via SMS to the user.
+
+    Prerequisites:
+      - Set these environment variables in your hosting platform (Render, etc.):
+          TWILIO_ACCOUNT_SID
+          TWILIO_AUTH_TOKEN
+          TWILIO_FROM_NUMBER   (your Twilio phone number, in E.164 format, e.g. +15551234567)
+
+    Args:
+        user_phone_number: Destination phone number in E.164 format (e.g. '+15551234567').
+        username_prefix:   A prefix for the username (e.g. 'microgrid').
+        username_length:   Number of random characters to append to the prefix.
+        password_length:   Length of the random password.
+
+    Returns:
+        (username, password) tuple.
+    """
+
+    # ---- Safety checks for Twilio config ----
+    account_sid = os.getenv("TWILIO_ACCOUNT_SID")
+    auth_token = os.getenv("TWILIO_AUTH_TOKEN")
+    from_number = os.getenv("TWILIO_FROM_NUMBER")
+
+    if not account_sid or not auth_token or not from_number:
+        raise RuntimeError(
+            "Twilio configuration missing. Set TWILIO_ACCOUNT_SID, "
+            "TWILIO_AUTH_TOKEN, and TWILIO_FROM_NUMBER as environment variables."
+        )
+
+    # ---- Random username & password generation ----
+    def _random_string(length: int, alphabet: str) -> str:
+        return "".join(random.choice(alphabet) for _ in range(length))
+
+    username_suffix = _random_string(
+        username_length,
+        alphabet=string.ascii_lowercase + string.digits,
+    )
+    username = f"{username_prefix}_{username_suffix}"
+
+    password_alphabet = (
+        string.ascii_letters + string.digits + "!@#$%^&*()-_=+"
+    )
+    password = _random_string(password_length, alphabet=password_alphabet)
+
+    # ---- Build SMS body ----
+    sms_body = (
+        "Your Microgrid access credentials:\n"
+        f"Username: {username}\n"
+        f"Password: {password}\n\n"
+        "For security, please store these in a safe place and do not share them."
+    )
+
+    # ---- Send SMS via Twilio ----
+    client = Client(account_sid, auth_token)
+    message = client.messages.create(
+        body=sms_body,
+        from_=from_number,
+        to=user_phone_number,
+    )
+
+    # Optional: log or inspect message.sid if needed
+    # print(f"Sent credentials SMS with SID: {message.sid}")
+
+    return username, password
+
+
+# Example usage (remove or comment out in production):
+# if __name__ == "__main__":
+#     u, p = generate_and_text_credentials(user_phone_number="+15555551234")
+#     print("Generated username:", u)
+#     print("Generated password:", p)
 
 def save_user_snapshot():
     """
