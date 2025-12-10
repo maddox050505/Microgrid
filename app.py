@@ -1632,7 +1632,6 @@ def _llm_tariff_from_location(zip_code: str = "", region: str = "", application:
         st.stop()
 
     try:
-        from openai import OpenAI
         client = OpenAI(api_key=key)
 
         model = os.getenv("LLM_MODEL", "gpt-4o-mini")
