@@ -2208,8 +2208,8 @@ def view_upload():
 
         st.success("Bill successfully read ✔")
 
-        # Store what we have in session
-        if total_kwh is not None:
+    # Store what we have in session
+    if total_kwh is not None:
         try:
             total_kwh_val = float(total_kwh)
             usage_display = f"{total_kwh_val:,.0f} kWh"
