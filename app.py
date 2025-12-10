@@ -2210,13 +2210,14 @@ def view_upload():
 
         # Store what we have in session
         if total_kwh is not None:
-          try:
-    total_kwh_val = float(total_kwh)
-    usage_display = f"{total_kwh_val:,.0f} kWh"
-except (TypeError, ValueError):
-    usage_display = "Unknown"
+        try:
+            total_kwh_val = float(total_kwh)
+            usage_display = f"{total_kwh_val:,.0f} kWh"
+        except (TypeError, ValueError):
+            usage_display = "Unknown"
 
-st.metric("Detected Monthly Usage", usage_display)
+        st.metric("Detected Monthly Usage", usage_display)
+
             st.session_state["bill_monthly_kwh"] = float(total_kwh)
         else:
             st.warning("Usage not found on the image. Please enter it below.")
