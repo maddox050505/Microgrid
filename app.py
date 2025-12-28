@@ -1,5 +1,29 @@
+import os
+import time
+import streamlit as st
+import requests
+
 st.set_option("client.showErrorDetails", True)
+
+st.title("Microgrid")
 st.write("✅ Streamlit booted")
+
+BACKEND = os.getenv("BACKEND_URL", "").rstrip("/")
+st.write("BACKEND_URL:", BACKEND if BACKEND else "(missing)")
+
+if not BACKEND:
+    st.error("Set BACKEND_URL in Render → this Streamlit service → Environment.")
+    st.stop()
+
+st.write("Pinging backend /health ...")
+try:
+    r = requests.get(f"{BACKEND}/health", timeout=10)
+    st.success(f"Backend OK: {r.status_code} {r.text}")
+except Exception as e:
+    st.error(f"Backend ping failed: {e}")
+    st.stop()
+
+st.divider()
 
 # ui/streamlit_app.py
 # -*- coding: utf-8 -*-
