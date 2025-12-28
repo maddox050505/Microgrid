@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 import time
 import streamlit as st
@@ -27,7 +29,6 @@ st.divider()
 
 # ui/streamlit_app.py
 # -*- coding: utf-8 -*-
-from __future__ import annotations
 
 # =========================
 # Imports & page config
