@@ -1,4 +1,5 @@
 st.set_option("client.showErrorDetails", True)
+st.write("✅ Streamlit booted")
 
 # ui/streamlit_app.py
 # -*- coding: utf-8 -*-
