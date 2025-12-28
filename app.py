@@ -60,6 +60,21 @@ from typing import Tuple
 
 import streamlit as st
 
+import streamlit as st
+
+import streamlit as st
+
+if "page" not in st.session_state:
+    st.session_state["page"] = "welcome"
+
+if "onboarding" not in st.session_state:
+    st.session_state["onboarding"] = {
+        "client_company": "",
+        "client_role": "",
+        "plan": "",
+        "goals": "",
+    }
+
 # -----------------------------
 # Session state initializer
 # -----------------------------
@@ -446,7 +461,8 @@ def page_welcome():
 def page_onboarding():
     st.title("Step 1: About your company")
 
-    ob = st.session_state.onboarding
+    init_state()  # <- add this at the very top of every page fn, or ensure main() always runs first
+    ob = st.session_state["onboarding"]
 
     ob["client_company"] = st.text_input("Company name", value=ob["client_company"])
     ob["client_role"] = st.selectbox(
