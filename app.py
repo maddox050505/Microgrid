@@ -150,6 +150,63 @@ def require_app_password():
                 st.error("Incorrect password. Please try again.")
     st.stop()
 
+def page_company():
+    init_state()
+    st.subheader("Company details")
+
+    ob = st.session_state["onboarding"]
+
+    ob["client_company"] = st.text_input("Company name", value=ob.get("client_company", ""))
+
+    ob["client_role"] = st.selectbox(
+        "Your role",
+        ["Select…", "Owner/Founder", "Operations", "Facilities/Energy Manager", "Finance", "Solar/EPC Partner", "Other"],
+        index=0 if ob.get("client_role","") == "" else
+              ["Select…", "Owner/Founder", "Operations", "Facilities/Energy Manager", "Finance", "Solar/EPC Partner", "Other"].index(ob["client_role"])
+              if ob["client_role"] in ["Owner/Founder", "Operations", "Facilities/Energy Manager", "Finance", "Solar/EPC Partner", "Other"] else 0
+    )
+    if ob["client_role"] == "Select…":
+        ob["client_role"] = ""
+
+    # Plan (see fix below)
+    ob["plan"] = st.selectbox(
+        "Choose a plan",
+        ["Select…", "Starter", "Pro", "Enterprise"],
+        index=0 if ob.get("plan","") == "" else
+              ["Select…", "Starter", "Pro", "Enterprise"].index(ob["plan"])
+              if ob["plan"] in ["Starter","Pro","Enterprise"] else 0
+    )
+    if ob["plan"] == "Select…":
+        ob["plan"] = ""
+
+    ob["goals"] = st.text_area("What are you trying to optimize?", value=ob.get("goals",""))
+
+    can_continue = (
+        ob["client_company"].strip() != ""
+        and ob["client_role"].strip() != ""
+        and ob["plan"].strip() != ""
+    )
+
+    c1, c2 = st.columns(2)
+    with c1:
+        if st.button("← Back", use_container_width=True):
+            go("welcome")
+
+    with c2:
+        if st.button("Continue →", use_container_width=True, disabled=not can_continue):
+            go("profile")  # <-- send them to ZIP/Application page
+        if not can_continue:
+            st.caption("Enter company, role, and plan to continue.")
+
+def page_profile():
+    init_state()
+
+    if not require_onboarding_complete():
+        st.warning("Complete Company details first.")
+        if st.button("Go to Company details"):
+            go("company")
+        return
+
 def inject_geolocator():
     st.markdown("""
     <script>
