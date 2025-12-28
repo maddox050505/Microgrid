@@ -13,6 +13,16 @@ from .plans import rules_for
 
 app = FastAPI(title="Microgrid API")
 
+@app.get("/")
+def root():
+    return {
+        "ok": True,
+        "message": "Microgrid API is running",
+        "health": "/health",
+        "docs": "/docs",
+        "openapi": "/openapi.json",
+    }
+
 # Create tables at startup (simple MVP). Later we can move to Alembic migrations.
 Base.metadata.create_all(bind=engine)
 
