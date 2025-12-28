@@ -1,3 +1,5 @@
+st.set_option("client.showErrorDetails", True)
+
 from __future__ import annotations
 
 from uuid import uuid4
