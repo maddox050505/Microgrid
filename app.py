@@ -58,6 +58,33 @@ from openai import OpenAI
 import string
 from typing import Tuple
 
+import streamlit as st
+
+# -----------------------------
+# Session state initializer
+# -----------------------------
+def init_state():
+    st.session_state.setdefault("page", "welcome")
+
+    st.session_state.setdefault("onboarding", {
+        "client_company": "",
+        "client_role": "",
+        "plan": "",
+        "goals": "",
+    })
+
+def go(page_name: str):
+    st.session_state.page = page_name
+    st.rerun()
+
+def require_onboarding_complete() -> bool:
+    ob = st.session_state.onboarding
+    return all([
+        ob.get("client_company", "").strip(),
+        ob.get("client_role", "").strip(),
+        ob.get("plan", "").strip(),
+    ])
+
 try:
     from twilio.rest import Client
 except ModuleNotFoundError:
@@ -402,6 +429,109 @@ PERSIST_KEYS = [
     "prev_bill_monthly_cost",
     "prev_bill_monthly_kwh",
 ]
+
+def page_welcome():
+    st.title("Microgrid")
+    st.write("Let’s set up your account in 60 seconds.")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("Get started →", use_container_width=True):
+            go("onboarding")
+    with col2:
+        if st.button("Skip to upload (dev)", use_container_width=True):
+            go("upload")
+
+
+def page_onboarding():
+    st.title("Step 1: About your company")
+
+    ob = st.session_state.onboarding
+
+    ob["client_company"] = st.text_input("Company name", value=ob["client_company"])
+    ob["client_role"] = st.selectbox(
+        "Your role",
+        ["", "Owner/Founder", "Operations", "Facilities/Energy Manager", "Finance", "Solar/EPC Partner", "Other"],
+        index=0 if ob["client_role"] == "" else
+              ["", "Owner/Founder", "Operations", "Facilities/Energy Manager", "Finance", "Solar/EPC Partner", "Other"].index(ob["client_role"])
+              if ob["client_role"] in ["", "Owner/Founder", "Operations", "Facilities/Energy Manager", "Finance", "Solar/EPC Partner", "Other"] else 0
+    )
+
+    ob["plan"] = st.radio(
+        "Choose a plan",
+        ["", "Starter", "Pro", "Enterprise"],
+        index=["", "Starter", "Pro", "Enterprise"].index(ob["plan"]) if ob["plan"] in ["", "Starter", "Pro", "Enterprise"] else 0,
+        horizontal=True
+    )
+
+    ob["goals"] = st.text_area("What are you trying to optimize?", value=ob["goals"], placeholder="Lower bill, eliminate demand charges, add backup, solar + storage sizing…")
+
+    st.divider()
+    left, right = st.columns(2)
+
+    with left:
+        if st.button("← Back", use_container_width=True):
+            go("welcome")
+
+    with right:
+        can_continue = require_onboarding_complete()
+        if st.button("Continue →", use_container_width=True, disabled=not can_continue):
+            go("upload")
+        if not can_continue:
+            st.caption("Enter company, role, and plan to continue.")
+
+
+def page_upload():
+    st.title("Step 2: Upload your bill(s)")
+
+    # Gate this page until onboarding is complete
+    if not require_onboarding_complete():
+        st.warning("Please complete onboarding first.")
+        if st.button("Go to onboarding"):
+            go("onboarding")
+        return
+
+    ob = st.session_state.onboarding
+    st.caption(f"Company: **{ob['client_company']}** • Plan: **{ob['plan']}**")
+
+    # Replace this with your current uploader + bill read logic
+    uploaded = st.file_uploader("Upload an electric bill", type=["png", "jpg", "jpeg", "pdf"])
+    if uploaded:
+        st.success("File received.")
+        # TODO: call your AI bill reader, store parsed results in session_state
+        st.session_state["bill_file_name"] = uploaded.name
+
+    st.divider()
+    left, right = st.columns(2)
+    with left:
+        if st.button("← Back", use_container_width=True):
+            go("onboarding")
+    with right:
+        if st.button("Continue →", use_container_width=True):
+            go("results")
+
+
+def page_results():
+    st.title("Step 3: Results")
+
+    if not require_onboarding_complete():
+        st.warning("Please complete onboarding first.")
+        if st.button("Go to onboarding"):
+            go("onboarding")
+        return
+
+    ob = st.session_state.onboarding
+    st.write("### Summary")
+    st.write(f"- Company: **{ob['client_company']}**")
+    st.write(f"- Role: **{ob['client_role']}**")
+    st.write(f"- Plan: **{ob['plan']}**")
+    if ob.get("goals"):
+        st.write(f"- Goals: {ob['goals']}")
+
+    st.write("### Next")
+    st.info("Wire this page to your optimization engine and projections.")
+    if st.button("← Back"):
+        go("upload")
 
 def _user_data_path() -> Optional[str]:
     user = st.session_state.get("username")
@@ -3220,6 +3350,24 @@ if _can_show_compare_ui():
 - **Hold a 25% battery reserve** for the evening unless prices are unusually low.
 """
         )
+
+def main():
+    init_state()
+
+    # Optional: a simple top nav
+    pages = {
+        "welcome": page_welcome,
+        "onboarding": page_onboarding,
+        "upload": page_upload,
+        "results": page_results,
+    }
+
+    # Render the current page
+    page = st.session_state.get("page", "welcome")
+    pages.get(page, page_welcome)()
+
+if __name__ == "__main__":
+    main()
 
 # =========================
 # Router
