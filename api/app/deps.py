@@ -26,3 +26,13 @@ def get_current_user(
         raise HTTPException(status_code=401, detail="User not found")
 
     return user
+
+from .models import Company
+from fastapi import HTTPException
+
+def get_company(db: Session, company_id: str) -> Company:
+    company = db.query(Company).filter(Company.id == company_id, Company.is_active == True).first()
+    if not company:
+        raise HTTPException(status_code=403, detail="Company missing or inactive")
+    return company
+
