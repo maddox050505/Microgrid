@@ -569,8 +569,8 @@ def page_upload():
 
     # Replace this with your current uploader + bill read logic
    st.info("Need to change the bill? Go to Upload.")
-   if st.button("Go to Upload"):
-    go("upload")
+    if st.button("Go to Upload"):
+        go("upload")
     return
 
     st.divider()
