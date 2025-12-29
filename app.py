@@ -502,6 +502,10 @@ PERSIST_KEYS = [
     "prev_bill_monthly_kwh",
 ]
 
+def page_forecasts():
+    st.title("Forecasts")
+    st.info("Forecasts page coming soon.")
+
 def page_welcome():
     st.title("Microgrid")
     st.write("Let’s set up your account in 60 seconds.")
