@@ -568,11 +568,10 @@ def page_upload():
     st.caption(f"Company: **{ob['client_company']}** • Plan: **{ob['plan']}**")
 
     # Replace this with your current uploader + bill read logic
-    uploaded = st.file_uploader("Upload an electric bill", type=["png", "jpg", "jpeg", "pdf"])
-    if uploaded:
-        st.success("File received.")
-        # TODO: call your AI bill reader, store parsed results in session_state
-        st.session_state["bill_file_name"] = uploaded.name
+   st.info("Need to change the bill? Go to Upload.")
+   if st.button("Go to Upload"):
+    go("upload")
+    return
 
     st.divider()
     left, right = st.columns(2)
@@ -3441,6 +3440,36 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+def init_state():
+    st.session_state.setdefault("page", "company")
+    st.session_state.setdefault("onboarding", {
+        "client_company": "",
+        "client_role": "",
+        "plan": "",
+        "goals": "",
+    })
+
+def go(page_name: str):
+    st.session_state["page"] = page_name
+    st.rerun()
+
+def main():
+    init_state()
+
+    pages = {
+        "company": page_company,
+        "profile": page_profile,
+        "upload": page_upload,
+        "forecasts": page_forecasts,
+        "optimize": page_optimize,
+        "dashboard": page_dashboard,
+    }
+
+    current = st.session_state.get("page", "company")
+    pages[current]()   # IMPORTANT: only one page renders
+
+main()
 
 # =========================
 # Router
