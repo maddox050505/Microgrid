@@ -3465,7 +3465,7 @@ def main():
         "profile": page_profile,
         "upload": page_upload,
         "forecasts": page_forecasts,
-        "optimize": page_optimize,
+        "optimize": page_optimization,
         "dashboard": page_dashboard,
     }
 
