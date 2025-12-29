@@ -3429,20 +3429,20 @@ if _can_show_compare_ui():
 def main():
     init_state()
 
-    # Optional: a simple top nav
     pages = {
-        "welcome": page_welcome,
-        "onboarding": page_onboarding,
+        "company": page_company,
+        "profile": page_profile,
         "upload": page_upload,
-        "results": page_results,
+        "forecasts": page_forecasts,
+        "optimize": page_optimization,
+        "dashboard": page_dashboard,
     }
 
-    # Render the current page
-    page = st.session_state.get("page", "welcome")
-    pages.get(page, page_welcome)()
+    current = st.session_state.get("page", "company")
 
-if __name__ == "__main__":
-    main()
+    _begin_page(current)
+    pages[current]()
+    _end_page()
 
 def init_state():
     st.session_state.setdefault("page", "company")
@@ -3506,6 +3506,18 @@ def main():
     pages[current]()  # IMPORTANT: only one page renders
 
 main()
+
+def _begin_page(page_key: str):
+    # If another page already started rendering this run, stop.
+    already = st.session_state.get("_rendering_page")
+    if already and already != page_key:
+        st.error(f"Render rule violated: '{already}' already started, but '{page_key}' tried to render.")
+        st.stop()
+    st.session_state["_rendering_page"] = page_key
+
+def _end_page():
+    # Optional: clear at the end of a successful page render
+    st.session_state.pop("_rendering_page", None)
 
 # =========================
 # Router
