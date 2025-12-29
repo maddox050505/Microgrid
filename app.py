@@ -3457,20 +3457,53 @@ def go(page_name: str):
     st.session_state["page"] = page_name
     st.rerun()
 
+# --- Safe fallback page so NameErrors never crash the app ---
+def _missing_page(name: str):
+    st.error(f"Page '{name}' is not available (function not defined).")
+    st.caption("Fix: define the function (e.g., def page_optimization(): ...) or update the pages dict.")
+    if st.button("Back to Company"):
+        go("company")
+
 def main():
     init_state()
 
-    pages = {
-        "company": page_company,
-        "profile": page_profile,
-        "upload": page_upload,
-        "forecasts": page_forecasts,
-        "optimize": page_optimization,
-        "dashboard": page_dashboard,
-    }
+    # Only add pages if the function exists in globals()
+    # This prevents NameError: name 'page_xxx' is not defined
+    pages = {}
+
+    if "page_company" in globals():
+        pages["company"] = globals()["page_company"]
+    else:
+        pages["company"] = lambda: _missing_page("company")
+
+    if "page_profile" in globals():
+        pages["profile"] = globals()["page_profile"]
+
+    if "page_upload" in globals():
+        pages["upload"] = globals()["page_upload"]
+
+    # These two are the ones causing your crash:
+    if "page_forecasts" in globals():
+        pages["forecasts"] = globals()["page_forecasts"]
+    else:
+        # keep route but don't crash if missing
+        pages["forecasts"] = lambda: _missing_page("forecasts")
+
+    if "page_optimization" in globals():
+        pages["optimize"] = globals()["page_optimization"]
+    else:
+        pages["optimize"] = lambda: _missing_page("optimize")
+
+    if "page_dashboard" in globals():
+        pages["dashboard"] = globals()["page_dashboard"]
 
     current = st.session_state.get("page", "company")
-    pages[current]()   # IMPORTANT: only one page renders
+    if current not in pages:
+        # If session points to a page key that isn't wired
+        _missing_page(current)
+        return
+
+    pages[current]()  # IMPORTANT: only one page renders
 
 main()
 
