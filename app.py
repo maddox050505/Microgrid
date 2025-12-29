@@ -568,7 +568,7 @@ def page_upload():
     st.caption(f"Company: **{ob['client_company']}** • Plan: **{ob['plan']}**")
 
     # Replace this with your current uploader + bill read logic
-   st.info("Need to change the bill? Go to Upload.")
+    st.info("Need to change the bill? Go to Upload.")
     if st.button("Go to Upload"):
         go("upload")
     return
@@ -581,7 +581,6 @@ def page_upload():
     with right:
         if st.button("Continue →", use_container_width=True):
             go("results")
-
 
 def page_results():
     st.title("Step 3: Results")
