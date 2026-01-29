@@ -3519,28 +3519,53 @@ def _end_page():
     # Optional: clear at the end of a successful page render
     st.session_state.pop("_rendering_page", None)
 
-# =========================
+# -------------------------
+# Page functions
+# -------------------------
+def page_welcome():
+    st.title("Microgrid")
+    st.subheader("Welcome")
+    st.write("Upload a utility bill to begin, or choose an option from the sidebar.")
+
+def page_upload():
+    st.title("Upload")
+    st.write("Upload UI goes here.")
+
+def page_dashboard():
+    st.title("Dashboard")
+    st.write("Dashboard UI goes here.")
+
+# -------------------------
 # Router
-# =========================
-page = st.session_state.get("step", "profile")
+# -------------------------
+PAGES = {
+    "welcome": page_welcome,
+    "upload": page_upload,
+    "dashboard": page_dashboard,
+}
 
-# Wrap all main pages in a centered shell for a more "product" feel
-with st.container():
-    st.markdown("<div class='main-shell'>", unsafe_allow_html=True)
+def run_router():
+    # default page
+    if "page" not in st.session_state:
+        st.session_state.page = "welcome"
 
-    if page == "profile":
-        view_profile()
-    elif page == "upload":
-        view_upload()
-    elif page == "tariff_prices":
-        view_tariff_prices()
-    elif page == "forecasts":
-        view_forecasts()
-    elif page == "optimize":
-        view_optimize()
-    elif page == "dashboard":
-        view_dashboard()
+    # sidebar nav
+    choice = st.sidebar.radio(
+        "Navigate",
+        options=list(PAGES.keys()),
+        index=list(PAGES.keys()).index(st.session_state.page)
+        if st.session_state.page in PAGES else 0
+    )
+
+    st.session_state.page = choice
+
+    # render
+    page_fn = PAGES.get(st.session_state.page)
+    if page_fn is None:
+        st.error(f"Page '{st.session_state.page}' not available.")
+        st.session_state.page = "welcome"
+        PAGES["welcome"]()
     else:
-        go_step("profile")
+        page_fn()
 
-    st.markdown("</div>", unsafe_allow_html=True)
+run_router()
